@@ -1,4 +1,4 @@
-# OpenFuck
+# OpenLuck
 
 ## Usage
 
