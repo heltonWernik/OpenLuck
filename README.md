@@ -1,4 +1,5 @@
 # OpenLuck
+Original is OpenFu*&%$#, I change for something more elegant
 
 ## Usage
 
