@@ -26,7 +26,7 @@ gcc -o OpenFuck OpenFuck.c -lcrypto
 ./OpenFuck
 ```
 
-5. See which service you witch to exploit. For example if you need to Red Hat Linux, using apache version 1.3.20. Trying out using the 0x6a option
+5. See which service you wish to exploit. For example if you need to Red Hat Linux, using apache version 1.3.20. Trying out using the 0x6a option
 ./OpenFuck 0x6a [Target Ip] [port] -c 40
 
 for example:
